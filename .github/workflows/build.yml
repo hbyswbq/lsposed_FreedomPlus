@@ -1,4 +1,4 @@
-name: Build APK (Stable Rewrite)
+name: Build APK (Kotlin Ready)
 
 on:
   push:
@@ -22,18 +22,19 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    # 完全重写根 build.gradle（兼容 Gradle 8.7）
+    # 重写根 build.gradle（包含 Kotlin 插件）
     - name: Rewrite root build.gradle
       run: |
         cat > build.gradle << 'EOF'
-        // Top-level build file
         buildscript {
+            ext.kotlin_version = '1.9.22'
             repositories {
                 google()
                 mavenCentral()
             }
             dependencies {
                 classpath 'com.android.tools.build:gradle:8.5.0'
+                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
             }
         }
 
@@ -49,7 +50,7 @@ jobs:
         }
         EOF
 
-    # 确保 settings.gradle 包含 app 和 ktutils
+    # 重写 settings.gradle
     - name: Rewrite settings.gradle
       run: |
         cat > settings.gradle << 'EOF'
@@ -70,29 +71,97 @@ jobs:
         include ':app', ':ktutils'
         EOF
 
-    # 重写 ktutils/build.gradle 为标准 Android 库
+    # 重写 ktutils/build.gradle（Android 库）
     - name: Rewrite ktutils/build.gradle
       run: |
         mkdir -p ktutils
         cat > ktutils/build.gradle << 'EOF'
         apply plugin: 'com.android.library'
+        apply plugin: 'org.jetbrains.kotlin.android'
 
         android {
             compileSdk 34
-
             defaultConfig {
                 minSdk 26
                 targetSdk 34
             }
+            buildTypes {
+                release { minifyEnabled false }
+                debug {}
+            }
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
 
+        dependencies {
+            implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        }
+        EOF
+
+    # 重写 app/build.gradle（若原有特殊依赖，可在后续追加）
+    - name: Rewrite app/build.gradle
+      run: |
+        cat > app/build.gradle << 'EOF'
+        apply plugin: 'com.android.application'
+        apply plugin: 'org.jetbrains.kotlin.android'
+
+        android {
+            compileSdk 34
+            defaultConfig {
+                applicationId "com.example.freedomplus"
+                minSdk 26
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
             buildTypes {
                 release {
                     minifyEnabled false
+                    proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
                 }
-                debug {
-                    // default
-                }
+                debug {}
             }
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
+
+        dependencies {
+            implementation project(':ktutils')
+            implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+            implementation 'androidx.core:core-ktx:1.12.0'
+            // 如需其他依赖，可在此添加
+        }
+        EOF
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build Debug APK
+      run: ./gradlew :app:assembleDebug
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: app/build/outputs/apk/debug/*.apk
+
+    - name: Attach to Release
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app/build/outputs/apk/debug/*.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}            }
 
             compileOptions {
                 sourceCompatibility JavaVersion.VERSION_17
