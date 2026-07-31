@@ -1,4 +1,4 @@
-name: Build APK (Auto-fix ktutils)
+name: Build APK (Stable Rewrite)
 
 on:
   push:
@@ -22,8 +22,56 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    # 修复 ktutils 模块（如果缺失或配置错误）
-    - name: Fix ktutils build.gradle
+    # 完全重写根 build.gradle（兼容 Gradle 8.7）
+    - name: Rewrite root build.gradle
+      run: |
+        cat > build.gradle << 'EOF'
+        // Top-level build file
+        buildscript {
+            repositories {
+                google()
+                mavenCentral()
+            }
+            dependencies {
+                classpath 'com.android.tools.build:gradle:8.5.0'
+            }
+        }
+
+        allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+
+        tasks.register('clean', Delete) {
+            delete rootProject.buildDir
+        }
+        EOF
+
+    # 确保 settings.gradle 包含 app 和 ktutils
+    - name: Rewrite settings.gradle
+      run: |
+        cat > settings.gradle << 'EOF'
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "FreedomPlus"
+        include ':app', ':ktutils'
+        EOF
+
+    # 重写 ktutils/build.gradle 为标准 Android 库
+    - name: Rewrite ktutils/build.gradle
       run: |
         mkdir -p ktutils
         cat > ktutils/build.gradle << 'EOF'
@@ -42,7 +90,7 @@ jobs:
                     minifyEnabled false
                 }
                 debug {
-                    // 无需额外配置
+                    // default
                 }
             }
 
@@ -53,24 +101,11 @@ jobs:
         }
 
         dependencies {
-            // 如果有原有依赖，可在此添加；若无，保持空
+            // 若有项目原有依赖，可在此添加；否则留空
         }
         EOF
 
-    # 确保根目录 build.gradle 使用正确的 AGP 版本（8.5.0）
-    - name: Align AGP version in root build.gradle
-      run: |
-        if grep -q "classpath 'com.android.tools.build:gradle:" build.gradle; then
-          sed -i "s/classpath 'com.android.tools.build:gradle:.*'/classpath 'com.android.tools.build:gradle:8.5.0'/" build.gradle
-        else
-          # 如果不存在，则插入到 buildscript 块中（简单处理）
-          echo "buildscript {
-              dependencies {
-                  classpath 'com.android.tools.build:gradle:8.5.0'
-              }
-          }" >> build.gradle
-        fi
-
+    # 可选：保留 app/build.gradle 不变，但若它依赖 ktutils 模块，上述修改已足够
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
@@ -83,7 +118,7 @@ jobs:
         name: app-debug
         path: app/build/outputs/apk/debug/*.apk
 
-    - name: Attach to Release (if triggered by release)
+    - name: Attach to Release (if triggered)
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v1
       with:
