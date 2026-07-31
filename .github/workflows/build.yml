@@ -1,4 +1,4 @@
-name: Build Debug APK
+name: Build APK (Auto-fix ktutils)
 
 on:
   push:
@@ -22,6 +22,55 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
+    # 修复 ktutils 模块（如果缺失或配置错误）
+    - name: Fix ktutils build.gradle
+      run: |
+        mkdir -p ktutils
+        cat > ktutils/build.gradle << 'EOF'
+        apply plugin: 'com.android.library'
+
+        android {
+            compileSdk 34
+
+            defaultConfig {
+                minSdk 26
+                targetSdk 34
+            }
+
+            buildTypes {
+                release {
+                    minifyEnabled false
+                }
+                debug {
+                    // 无需额外配置
+                }
+            }
+
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+        }
+
+        dependencies {
+            // 如果有原有依赖，可在此添加；若无，保持空
+        }
+        EOF
+
+    # 确保根目录 build.gradle 使用正确的 AGP 版本（8.5.0）
+    - name: Align AGP version in root build.gradle
+      run: |
+        if grep -q "classpath 'com.android.tools.build:gradle:" build.gradle; then
+          sed -i "s/classpath 'com.android.tools.build:gradle:.*'/classpath 'com.android.tools.build:gradle:8.5.0'/" build.gradle
+        else
+          # 如果不存在，则插入到 buildscript 块中（简单处理）
+          echo "buildscript {
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.5.0'
+              }
+          }" >> build.gradle
+        fi
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
@@ -34,7 +83,7 @@ jobs:
         name: app-debug
         path: app/build/outputs/apk/debug/*.apk
 
-    - name: Attach to Release
+    - name: Attach to Release (if triggered by release)
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v1
       with:
