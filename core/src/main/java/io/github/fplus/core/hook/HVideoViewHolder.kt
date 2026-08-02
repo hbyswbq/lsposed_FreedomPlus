@@ -169,7 +169,7 @@ class HVideoViewHolder : BaseHook() {
         view?.postRunning {
             val isAvatarImageWithLive = videoOptionBarFilterKeywords.pattern.contains("头像")
             view.forEachChild { child ->
-                if (isAvatarImageWithLive && child.javaClass.name.contains("AvatarImageWithLive")) {
+                if (isAvatarImageWithLive && (child.javaClass.name.contains("AvatarImage") || child.contentDescription?.toString()?.contains("头像") == true)) {
                     val parentView = child.firstParentOrNull(RelativeLayout::class.java)
                     parentView?.isVisible = false
                 }
@@ -294,6 +294,8 @@ class HVideoViewHolder : BaseHook() {
     fun getAwemeAfter(params: MethodParam) {
         hookBlockRunning(params) {
             HVideoViewHolder.aweme = result?.asOrNull()
+            // 数据绑定时重新应用控件隐藏，解决 ViewHolder 复用导致的闪烁问题
+            changeFeedRightScaleView(params)
         }.onFailure {
             XplerLog.e(it)
         }
