@@ -158,7 +158,9 @@ class HMainActivity : BaseHook() {
                     mainTitleBar = child
                 }
 
-                if (DexkitBuilder.mainBottomTabViewClazz?.name == child.javaClass.name) {
+                if (DexkitBuilder.mainBottomTabViewClazz?.name == child.javaClass.name
+                    || child.javaClass.name.contains("MainBottomTabView")
+                ) {
                     bottomTabView = child
                 }
 

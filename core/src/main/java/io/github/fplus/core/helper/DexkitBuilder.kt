@@ -374,6 +374,19 @@ object DexkitBuilder {
             }
             mainBottomTabViewClazz = mainBottomTabView.instance("mainBottomTabView")
 
+            // 31.7.2+ 版本底部导航栏类变为 MainBottomTabViewFallback
+            if (mainBottomTabViewClazz == null) {
+                val mainBottomTabViewFallback = bridge.findClass {
+                    matcher {
+                        superClass = "android.widget.FrameLayout"
+                        usingStrings {
+                            add("MainBottomTabViewFallback", StringMatchType.Equals)
+                        }
+                    }
+                }
+                mainBottomTabViewClazz = mainBottomTabViewFallback.instance("mainBottomTabViewFallback")
+            }
+
             val bottomCtrlBar = bridge.findClass {
                 searchPackages("X")
                 matcher {
@@ -715,6 +728,7 @@ object DexkitBuilder {
         sideBarNestedScrollViewClazz = classCache.getStringOrDefault("sideBarNestedScrollView").loadOrFindClass()
         cornerExtensionsPopupWindowClazz = classCache.getStringOrDefault("coenerExtendsionsPoupWindow").loadOrFindClass()
         mainBottomTabViewClazz = classCache.getStringOrDefault("mainBottomTabView").loadOrFindClass()
+            ?: classCache.getStringOrDefault("mainBottomTabViewFallback").loadOrFindClass()
         mainBottomPhotoTabClazz = classCache.getStringOrDefault("mainBottomPhotoTab").loadOrFindClass()
         commentListPageFragmentClazz = classCache.getStringOrDefault("commentListPageFragment").loadOrFindClass()
         commentColorModeViewModeClazz = classCache.getStringOrDefault("commentColorModeViewMode").loadOrFindClass()
