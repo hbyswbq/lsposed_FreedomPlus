@@ -76,22 +76,14 @@ class HVideoViewHolder : BaseHook() {
         val key = Integer.toHexString(System.identityHashCode(view))
 
         onDrawMaps.putIfAbsent(key, ViewTreeObserver.OnDrawListener {
-            if (config.isTranslucent) {
-                val alpha = config.translucentValue[1] / 100f
-                if (view.alpha > alpha) {
-                    view.alpha = alpha
-                }
-            }
-
-            if (config.isNeatMode) {
-                if (config.neatModeState) {
-                    view.isVisible = !HPlayerController.isPlaying
-                    HMainActivity.toggleView(view.isVisible)
-                }
-            }
+            // 修复: 不在 onDraw 回调中修改 alpha/visibility, 否则会触发
+            // invalidate -> onDraw -> invalidate 无限重绘循环。
+            // UI 状态改由 addOnDraw 注册时及 onViewHolderSelected/onResume 主动设置。
         })
 
         view.viewTreeObserver.addOnDrawListener(onDrawMaps[key])
+        // 修复: 注册时立即应用一次半透明/清爽模式状态, 替代原 onDraw 中的逐帧设置
+        applyViewState(view)
     }
 
     private fun removeOnDraw(view: View?) {
@@ -101,7 +93,32 @@ class HVideoViewHolder : BaseHook() {
         }
 
         val key = Integer.toHexString(System.identityHashCode(view))
-        view.viewTreeObserver.removeOnDrawListener(onDrawMaps[key])
+        // 修复: 从 map 中移除 key, 避免 onDrawMaps 随 ViewHolder 复用持续增长
+        val listener = onDrawMaps.remove(key)
+        if (listener != null) {
+            view.viewTreeObserver.removeOnDrawListener(listener)
+        }
+    }
+
+    /**
+     * 修复: 将半透明/清爽模式的 UI 状态应用从 onDraw 回调中移出,
+     * 改为在选中/恢复时主动调用一次, 避免每帧修改属性导致的重绘风暴。
+     */
+    private fun applyViewState(view: View) {
+        runCatching {
+            if (config.isTranslucent) {
+                val alpha = config.translucentValue[1] / 100f
+                if (view.alpha > alpha) {
+                    view.alpha = alpha
+                }
+            }
+            if (config.isNeatMode && config.neatModeState) {
+                view.isVisible = !HPlayerController.isPlaying
+                HMainActivity.toggleView(view.isVisible)
+            }
+        }.onFailure {
+            XplerLog.e(it)
+        }
     }
 
     private fun testOnDraw(tag: String) {
