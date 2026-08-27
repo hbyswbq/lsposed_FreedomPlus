@@ -76,13 +76,21 @@ class HVideoViewHolder : BaseHook() {
         val key = Integer.toHexString(System.identityHashCode(view))
 
         onDrawMaps.putIfAbsent(key, ViewTreeObserver.OnDrawListener {
-            // 修复: 不在 onDraw 回调中修改 alpha/visibility, 否则会触发
-            // invalidate -> onDraw -> invalidate 无限重绘循环。
-            // UI 状态改由 addOnDraw 注册时及 onViewHolderSelected/onResume 主动设置。
+            // 修复: onDraw 中仅保留 alpha 的条件设置。
+            // setAlpha 内部有 if (alpha != mAlpha) 判断, 且此处额外判断 view.alpha > alpha,
+            // 值不变时不会触发 invalidate, 因此不会形成重绘循环。
+            // 而 visibility/toggleView 没有值判断, 每次赋值都会触发 requestLayout,
+            // 已移出 onDraw, 改由 applyViewState 在 selected/resume 时设置一次。
+            if (config.isTranslucent) {
+                val alpha = config.translucentValue[1] / 100f
+                if (view.alpha > alpha) {
+                    view.alpha = alpha
+                }
+            }
         })
 
         view.viewTreeObserver.addOnDrawListener(onDrawMaps[key])
-        // 修复: 注册时立即应用一次半透明/清爽模式状态, 替代原 onDraw 中的逐帧设置
+        // 修复: 注册时应用清爽模式的 visibility 状态(alpha 由 onDraw 持续维护)
         applyViewState(view)
     }
 
@@ -101,17 +109,12 @@ class HVideoViewHolder : BaseHook() {
     }
 
     /**
-     * 修复: 将半透明/清爽模式的 UI 状态应用从 onDraw 回调中移出,
-     * 改为在选中/恢复时主动调用一次, 避免每帧修改属性导致的重绘风暴。
+     * 修复: 清爽模式的 visibility 状态从 onDraw 回调中移出,
+     * 改为在选中/恢复时主动调用一次, 避免每帧修改 visibility 导致的重绘风暴。
+     * 注意: alpha(半透明)仍在 OnDrawListener 中持续维护, 此处不重复设置。
      */
     private fun applyViewState(view: View) {
         runCatching {
-            if (config.isTranslucent) {
-                val alpha = config.translucentValue[1] / 100f
-                if (view.alpha > alpha) {
-                    view.alpha = alpha
-                }
-            }
             if (config.isNeatMode && config.neatModeState) {
                 view.isVisible = !HPlayerController.isPlaying
                 HMainActivity.toggleView(view.isVisible)
