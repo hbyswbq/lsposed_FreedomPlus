@@ -41,7 +41,8 @@ class HVideoViewHolder : BaseHook() {
 
         onDrawMaps.putIfAbsent(key, ViewTreeObserver.OnDrawListener {
             if (config.isNeatMode && config.neatModeState) {
-                HMainActivity.toggleView(!HPlayerController.isPlaying)
+                view.isVisible = !HPlayerController.isPlaying
+                HMainActivity.toggleView(view.isVisible)
             }
         })
 
@@ -61,6 +62,36 @@ class HVideoViewHolder : BaseHook() {
     private fun getWidgetContainer(params: MethodParam): PenetrateTouchRelativeLayout? {
         return params.thisObject?.findFieldGetValue<PenetrateTouchRelativeLayout> {
             type(PenetrateTouchRelativeLayout::class.java)
+        }
+    }
+
+    @OnBefore("isCleanMode")
+    fun isCleanModeBefore(params: MethodParam, view: View?, bool: Boolean) {
+        hookBlockRunning(params) {
+            if (!config.isNeatMode)
+                return
+
+            if (!config.neatModeState)
+                return
+
+            setResultVoid()
+        }.onFailure {
+            XplerLog.e(it)
+        }
+    }
+
+    @OnBefore("openCleanMode")
+    fun openCleanModeBefore(params: MethodParam, bool: Boolean) {
+        hookBlockRunning(params) {
+            if (!config.isNeatMode)
+                return
+
+            if (!config.neatModeState)
+                return
+
+            setResultVoid()
+        }.onFailure {
+            XplerLog.e(it)
         }
     }
 

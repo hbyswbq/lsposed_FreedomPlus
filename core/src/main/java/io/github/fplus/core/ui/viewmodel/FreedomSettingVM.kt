@@ -55,6 +55,15 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
     private var _isNeatMode = MutableLiveData(false)
     val isNeatMode: LiveData<Boolean> = _isNeatMode
 
+    private var _isDialogFilter = MutableLiveData(false)
+    val isDialogFilter: LiveData<Boolean> = _isDialogFilter
+
+    private var _dialogDismissTips = MutableLiveData(false)
+    val dialogDismissTips: LiveData<Boolean> = _dialogDismissTips
+
+    private var _dialogFilterKeywords = MutableLiveData("")
+    val dialogFilterKeywords: LiveData<String> = _dialogFilterKeywords
+
     private var _isImmersive = MutableLiveData(false)
     val isImmersive: LiveData<Boolean> = _isImmersive
 
@@ -89,6 +98,9 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
             setDoubleClickType(config.doubleClickType)
             changeIsNeatMode(config.isNeatMode)
             setLongPressMode(config.longPressMode)
+            changeIsDialogFilter(config.isDialogFilter)
+            setDialogDismissTips(config.dialogDismissTips)
+            setDialogFilterKeywords(config.dialogFilterKeywords)
             changeIsImmersive(config.isImmersive)
             setSystemControllerValue(config.systemControllerValue)
         }
@@ -146,6 +158,24 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
     fun changeIsNeatMode(value: Boolean) {
         _isNeatMode.value = value
         config.isNeatMode = value
+    }
+
+    // 弹窗过滤
+    fun changeIsDialogFilter(value: Boolean) {
+        _isDialogFilter.value = value
+        config.isDialogFilter = value
+    }
+
+    // 弹窗关闭提示
+    fun setDialogDismissTips(value: Boolean) {
+        _dialogDismissTips.value = value
+        config.dialogDismissTips = value
+    }
+
+    // 弹窗过滤关键字
+    fun setDialogFilterKeywords(value: String) {
+        _dialogFilterKeywords.value = value
+        config.dialogFilterKeywords = value
     }
 
     // 全屏沉浸

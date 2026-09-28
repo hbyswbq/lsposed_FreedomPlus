@@ -134,6 +134,39 @@ class ConfigV1 private constructor() {
             field = value
         }
 
+    /// 弹窗过滤
+    var isDialogFilter: Boolean = false
+        get() {
+            field = mmkv.getBoolean("isDialogFilter", false)
+            return field
+        }
+        set(value) {
+            mmkv.putBoolean("isDialogFilter", value)
+            field = value
+        }
+
+    /// 弹窗关闭提示
+    var dialogDismissTips: Boolean = false
+        get() {
+            field = mmkv.getBoolean("dialogDismissTips", false)
+            return field
+        }
+        set(value) {
+            mmkv.putBoolean("dialogDismissTips", value)
+            field = value
+        }
+
+    /// 弹窗过滤关键字
+    var dialogFilterKeywords: String = "现在安装, 立即升级"
+        get() {
+            field = mmkv.getString("dialogFilterKeywords", "现在安装, 立即升级")!!
+            return field
+        }
+        set(value) {
+            mmkv.putString("dialogFilterKeywords", value)
+            field = value
+        }
+
     /// 清爽模式
     var isNeatMode: Boolean = true
         get() {

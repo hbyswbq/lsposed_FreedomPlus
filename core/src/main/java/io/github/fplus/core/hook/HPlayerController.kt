@@ -32,10 +32,9 @@ class HPlayerController : BaseHook() {
     @OnBefore("onPlaying")
     fun onPlayingAfter(params: MethodParam, aid: String?) {
         hookBlockRunning(params) {
-            // XplerLog.d("onPlaying: $aid")
             playingAid = aid
             isPlaying = true
-            // callOpenCleanMode(params, true)
+            callOpenCleanMode(params, true)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -44,10 +43,9 @@ class HPlayerController : BaseHook() {
     @OnBefore("onResumePlay")
     fun onResumePlayBefore(params: MethodParam, aid: String?) {
         hookBlockRunning(params) {
-            // XplerLog.d("onResumePlay: $aid")
             playingAid = aid
             isPlaying = true
-            // callOpenCleanMode(params, true)
+            callOpenCleanMode(params, true)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -56,10 +54,9 @@ class HPlayerController : BaseHook() {
     @OnBefore("onPausePlay")
     fun onPausePlayBefore(params: MethodParam, aid: String?) {
         hookBlockRunning(params) {
-            // XplerLog.d("onPausePlay: $aid")
             if (playingAid == aid) {
                 isPlaying = false
-                // callOpenCleanMode(params, false)
+                callOpenCleanMode(params, false)
             }
         }.onFailure {
             XplerLog.e(it)

@@ -56,6 +56,7 @@ class DouYinMain(private val app: Application) {
                     HDisallowInterceptRelativeLayout()
                     HPlayerController()
                     HPenetrateTouchRelativeLayout()
+                    HDialog()
                 },
                 searchAfter = {
                     HCrashTolerance()

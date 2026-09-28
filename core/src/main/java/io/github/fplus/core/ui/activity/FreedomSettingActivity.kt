@@ -29,6 +29,7 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -251,6 +252,7 @@ class FreedomSettingActivity : XplerActivity() {
             item { DownloadItem() }
             item { DoubleClickTypeItem() }
             item { NeatModeItem() }
+            item { DialogFilterItem() }
             item { ImmersiveItem() }
         }
     }
@@ -487,6 +489,67 @@ class FreedomSettingActivity : XplerActivity() {
                             style = MaterialTheme.typography.body1,
                         )
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun DialogFilterItem() {
+        var showSettingDialog by remember { mutableStateOf(false) }
+
+        SwitchItem(
+            text = "弹窗过滤",
+            subtext = "自动关闭包含关键字的弹窗, 点击设置关键字",
+            checked = model.isDialogFilter.observeAsState(false),
+            onClick = {
+                showSettingDialog = true
+            },
+            onCheckedChange = {
+                model.changeIsDialogFilter(it)
+            }
+        )
+
+        if (showSettingDialog) {
+            val dialogDismissTips by model.dialogDismissTips.observeAsState(false)
+            val keywords by model.dialogFilterKeywords.observeAsState("")
+            val textState = remember { mutableStateOf(keywords) }
+
+            FMessageDialog(
+                title = "弹窗过滤设置",
+                confirm = "保存",
+                onConfirm = {
+                    model.setDialogFilterKeywords(textState.value)
+                    showSettingDialog = false
+                },
+                onDismiss = { showSettingDialog = false },
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = dialogDismissTips,
+                            onCheckedChange = { model.setDialogDismissTips(it) },
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                        Text(
+                            text = "关闭弹窗时提示",
+                            style = MaterialTheme.typography.body1,
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
+                    Text(
+                        text = "过滤关键字(逗号分隔)",
+                        style = MaterialTheme.typography.body2,
+                    )
+                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
+                    TextField(
+                        value = textState.value,
+                        onValueChange = { textState.value = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = false,
+                        maxLines = 3,
+                        placeholder = { Text("现在安装, 立即升级") },
+                    )
                 }
             }
         }
