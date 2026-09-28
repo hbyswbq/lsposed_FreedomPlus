@@ -522,7 +522,6 @@ class FreedomSettingActivity : XplerActivity() {
                     model.setDialogFilterKeywords(textState.value)
                     showSettingDialog = false
                 },
-                onDismiss = { showSettingDialog = false },
             ) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
