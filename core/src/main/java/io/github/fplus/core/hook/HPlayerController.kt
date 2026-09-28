@@ -29,7 +29,6 @@ class HPlayerController : BaseHook() {
         hookBlockRunning(params) {
             playingAid = aid
             isPlaying = true
-            HVideoViewHolder.applyNeatMode(true)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -40,7 +39,6 @@ class HPlayerController : BaseHook() {
         hookBlockRunning(params) {
             playingAid = aid
             isPlaying = true
-            HVideoViewHolder.applyNeatMode(true)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -51,7 +49,6 @@ class HPlayerController : BaseHook() {
         hookBlockRunning(params) {
             if (playingAid == aid) {
                 isPlaying = false
-                HVideoViewHolder.applyNeatMode(false)
             }
         }.onFailure {
             XplerLog.e(it)

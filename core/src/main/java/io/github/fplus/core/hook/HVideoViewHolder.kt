@@ -1,8 +1,6 @@
 package io.github.fplus.core.hook
 
 import android.annotation.SuppressLint
-import android.view.View
-import androidx.core.view.isVisible
 import com.freegang.extension.asOrNull
 import com.freegang.extension.findFieldGetValue
 import com.ss.android.ugc.aweme.feed.model.Aweme
@@ -24,20 +22,6 @@ class HVideoViewHolder : BaseHook() {
         @get:Synchronized
         @set:Synchronized
         var currentContainer: PenetrateTouchRelativeLayout? = null
-
-        /**
-         * 根据播放状态应用清爽模式
-         * @param isPlaying true=播放中(隐藏控制栏), false=暂停(显示控制栏)
-         */
-        @JvmStatic
-        fun applyNeatMode(isPlaying: Boolean) {
-            val config = ConfigV1.get()
-            if (!config.isNeatMode || !config.neatModeState) return
-
-            val visible = !isPlaying
-            currentContainer?.isVisible = visible
-            HMainActivity.toggleView(visible)
-        }
     }
 
     private val config get() = ConfigV1.get()
@@ -52,31 +36,15 @@ class HVideoViewHolder : BaseHook() {
         }
     }
 
-    @OnBefore("isCleanMode")
-    fun isCleanModeBefore(params: MethodParam, view: View?, bool: Boolean) {
+    /**
+     * 监听抖音原生 openCleanMode 调用, 同步顶部/底部栏状态
+     * bool=true: 开启清爽模式(隐藏控制栏), bool=false: 关闭清爽模式(显示控制栏)
+     */
+    @OnAfter("openCleanMode")
+    fun openCleanModeAfter(params: MethodParam, bool: Boolean) {
         hookBlockRunning(params) {
-            if (!config.isNeatMode)
-                return
-
-            if (!config.neatModeState)
-                return
-
-            setResultVoid()
-        }.onFailure {
-            XplerLog.e(it)
-        }
-    }
-
-    @OnBefore("openCleanMode")
-    fun openCleanModeBefore(params: MethodParam, bool: Boolean) {
-        hookBlockRunning(params) {
-            if (!config.isNeatMode)
-                return
-
-            if (!config.neatModeState)
-                return
-
-            setResultVoid()
+            if (!config.isNeatMode || !config.neatModeState) return
+            HMainActivity.toggleView(!bool)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -95,8 +63,6 @@ class HVideoViewHolder : BaseHook() {
     fun onViewHolderSelectedAfter(params: MethodParam, index: Int) {
         hookBlockRunning(params) {
             currentContainer = getWidgetContainer(params)
-            // 选中时立即应用当前播放状态
-            applyNeatMode(HPlayerController.isPlaying)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -130,7 +96,6 @@ class HVideoViewHolder : BaseHook() {
     fun onResumeAfter(params: MethodParam) {
         hookBlockRunning(params) {
             currentContainer = getWidgetContainer(params)
-            applyNeatMode(HPlayerController.isPlaying)
         }.onFailure {
             XplerLog.e(it)
         }
