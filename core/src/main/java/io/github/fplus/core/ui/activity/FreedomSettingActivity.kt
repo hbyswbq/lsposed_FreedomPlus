@@ -2,7 +2,6 @@ package io.github.fplus.core.ui.activity
 
 import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -14,13 +13,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
@@ -31,7 +27,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Slider
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -39,7 +34,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -51,12 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -69,14 +60,10 @@ import io.github.fplus.core.helper.DexkitBuilder
 import io.github.fplus.core.ui.ModuleTheme
 import io.github.fplus.core.ui.asDp
 import io.github.fplus.core.ui.component.FCard
-import io.github.fplus.core.ui.component.FCardBorder
-import io.github.fplus.core.ui.component.FCountDownMessageDialog
 import io.github.fplus.core.ui.component.FMessageDialog
-import io.github.fplus.core.ui.component.FWaitingMessageDialog
 import io.github.fplus.core.ui.viewmodel.FreedomSettingVM
 import io.github.fplus.plugin.activity.XplerActivity
 import io.github.fplus.resource.IconRes
-import io.github.fplus.resource.icons.History
 import io.github.fplus.resource.icons.Manage
 import io.github.fplus.resource.icons.Motion
 import kotlinx.coroutines.Dispatchers
@@ -152,20 +139,13 @@ class FreedomSettingActivity : XplerActivity() {
                     contentDescription = "Log",
                     modifier = Modifier
                         .size(24.dp)
-                        .combinedClickable(
+                        .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
-                            onLongClick = {
-                                if (!model.hasDexkitCache) {
-                                    KToastUtils.show(application, "没有类日志")
-                                    return@combinedClickable
-                                }
-                                showLogDialog = true
-                            },
                             onClick = {
                                 if (!model.hasDexkitCache) {
                                     KToastUtils.show(application, "没有类日志")
-                                    return@combinedClickable
+                                    return@clickable
                                 }
                                 showLogDialog = true
                             },
@@ -637,74 +617,6 @@ class FreedomSettingActivity : XplerActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    private fun SwitchItem(
-        text: AnnotatedString,
-        subtext: AnnotatedString = buildAnnotatedString { append("") },
-        isWaiting: Boolean = false,
-        checked: State<Boolean>,
-        onCheckedChange: (checked: Boolean) -> Unit,
-        onClick: () -> Unit = {},
-        onLongClick: () -> Unit = {},
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-                .combinedClickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                        onClick.invoke()
-                    },
-                    onLongClick = {
-                        onLongClick.invoke()
-                    }
-                )
-                .then(if (subtext.isNotBlank()) Modifier.padding(vertical = 4.dp) else Modifier),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(
-                    text = text,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.body1,
-                )
-                if (subtext.isNotBlank()) {
-                    Text(
-                        modifier = Modifier.padding(vertical = 2.dp),
-                        text = subtext,
-                        style = MaterialTheme.typography.body2,
-                    )
-                }
-            }
-            if (isWaiting) {
-                Box(
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.Center)
-                        .padding(17.dp), // switch: width = 34.dp
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(MaterialTheme.typography.body1.fontSize.asDp),
-                    )
-                }
-            } else {
-                Switch(
-                    checked = checked.value,
-                    onCheckedChange = {
-                        onCheckedChange.invoke(it)
-                    },
-                )
-            }
-        }
-    }
-
     @Composable
     private fun CheckBoxItem(
         text: String,
@@ -752,7 +664,7 @@ class FreedomSettingActivity : XplerActivity() {
             ) {
                 TextButton(
                     onClick = {
-                        // expanded = true
+                        expanded = true
                     },
                 ) {
                     Text(

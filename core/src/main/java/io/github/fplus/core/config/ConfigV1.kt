@@ -47,9 +47,9 @@ class ConfigV1 private constructor() {
     }
 
     /// 视频/图文/音乐下载
-    var isDownload: Boolean = false
+    var isDownload: Boolean = true
         get() {
-            field = mmkv.getBoolean("isDownload", false)
+            field = mmkv.getBoolean("isDownload", true)
             return field
         }
         set(value) {
@@ -113,9 +113,9 @@ class ConfigV1 private constructor() {
         }
 
     /// 双击屏幕响应类型
-    var isDoubleClickType: Boolean = false
+    var isDoubleClickType: Boolean = true
         get() {
-            field = mmkv.getBoolean("isDoubleClickType", false)
+            field = mmkv.getBoolean("isDoubleClickType", true)
             return field
         }
         set(value) {
@@ -135,9 +135,9 @@ class ConfigV1 private constructor() {
         }
 
     /// 清爽模式
-    var isNeatMode: Boolean = false
+    var isNeatMode: Boolean = true
         get() {
-            field = mmkv.getBoolean("isNeatMode", false)
+            field = mmkv.getBoolean("isNeatMode", true)
             return field
         }
         set(value) {
@@ -168,9 +168,9 @@ class ConfigV1 private constructor() {
         }
 
     /// 全屏沉浸式
-    var isImmersive: Boolean = false
+    var isImmersive: Boolean = true
         get() {
-            return mmkv.getBoolean("immersive", false)
+            return mmkv.getBoolean("immersive", true)
         }
         set(value) {
             mmkv.putBoolean("immersive", value)
