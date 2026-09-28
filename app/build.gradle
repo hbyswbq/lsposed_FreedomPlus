@@ -105,6 +105,5 @@ dependencies {
     implementation(libs.mmkv)
 
     implementation project(":core")
-    implementation project(":webdav")
     implementation project(":ktutils")
 }

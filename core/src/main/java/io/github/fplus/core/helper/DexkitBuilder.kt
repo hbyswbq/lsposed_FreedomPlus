@@ -40,7 +40,6 @@ object DexkitBuilder {
     var mainBottomTabViewClazz: Class<*>? = null
     var mainBottomPhotoTabClazz: Class<*>? = null
     var commentListPageFragmentClazz: Class<*>? = null
-    var commentColorModeViewModeClazz: Class<*>? = null
     var conversationFragmentClazz: Class<*>? = null
     var seekBarSpeedModeBottomContainerClazz: Class<*>? = null
     var abstractFeedAdapterClazz: Class<*>? = null
@@ -187,22 +186,6 @@ object DexkitBuilder {
                 }
             }
             commentListPageFragmentClazz = commentListPageFragment.instance("commentListPageFragment")
-
-            val commentColorModeViewMode = bridge.findClass {
-                matcher {
-                    superClass = "androidx.lifecycle.ViewModel"
-                    methods {
-                        add {
-                            returnType = "com.ss.android.ugc.aweme.comment.constants.CommentColorMode"
-                        }
-
-                        add {
-                            paramTypes = listOf("com.ss.android.ugc.aweme.comment.constants.CommentColorMode")
-                        }
-                    }
-                }
-            }
-            commentColorModeViewModeClazz = commentColorModeViewMode.instance("commentColorModeViewMode")
 
             val conversationFragment = bridge.findClass {
                 matcher {
@@ -731,7 +714,6 @@ object DexkitBuilder {
             ?: classCache.getStringOrDefault("mainBottomTabViewFallback").loadOrFindClass()
         mainBottomPhotoTabClazz = classCache.getStringOrDefault("mainBottomPhotoTab").loadOrFindClass()
         commentListPageFragmentClazz = classCache.getStringOrDefault("commentListPageFragment").loadOrFindClass()
-        commentColorModeViewModeClazz = classCache.getStringOrDefault("commentColorModeViewMode").loadOrFindClass()
         conversationFragmentClazz = classCache.getStringOrDefault("conversationFragment").loadOrFindClass()
         seekBarSpeedModeBottomContainerClazz = classCache.getStringOrDefault("seekBarSpeedModeBottomContainer").loadOrFindClass()
         abstractFeedAdapterClazz = classCache.getStringOrDefault("abstractFeedAdapter").loadOrFindClass()

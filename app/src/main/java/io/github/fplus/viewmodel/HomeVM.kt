@@ -38,9 +38,6 @@ class HomeVM(application: Application) : AndroidViewModel(application) {
             .child(Environment.DIRECTORY_DOWNLOADS)
             .child("Freedom")
 
-    // 是否开启去插件化
-    val isDisablePlugin get() = config.isDisablePlugin
-
     // 检查版本更新
     fun checkVersion() {
         if (KAppUtils.isAppInDebug(app)) return // 测试包不检查更新

@@ -369,7 +369,7 @@ class HomeActivity : ComponentActivity() {
                                 style = Themes.nowTypography.body1,
                             )
                             Text(
-                                text = if (model.isDisablePlugin) "点击跳转模块设置" else "抖音内部左上角侧滑栏/加号按钮唤起模块设置",
+                                text = "抖音内部左上角侧滑栏/加号按钮唤起模块设置",
                                 style = Themes.nowTypography.overline,
                             )
                         }
