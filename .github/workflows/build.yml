@@ -2,14 +2,14 @@ name: Build APK
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, lite ]
     paths-ignore:
       - '**.md'
       - 'LICENSE'
       - '.gitignore'
       - 'readme.md'
   pull_request:
-    branches: [ master, main ]
+    branches: [ master, main, lite ]
   workflow_dispatch:
     inputs:
       build_type:
