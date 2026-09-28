@@ -3,6 +3,7 @@ package io.github.fplus.core.hook
 import android.annotation.SuppressLint
 import com.freegang.extension.asOrNull
 import com.freegang.extension.findFieldGetValue
+import com.freegang.extension.findMethodInvoke
 import com.ss.android.ugc.aweme.feed.model.Aweme
 import com.ss.android.ugc.aweme.feed.ui.PenetrateTouchRelativeLayout
 import io.github.fplus.core.base.BaseHook
@@ -22,6 +23,27 @@ class HVideoViewHolder : BaseHook() {
         @get:Synchronized
         @set:Synchronized
         var currentContainer: PenetrateTouchRelativeLayout? = null
+
+        @get:Synchronized
+        @set:Synchronized
+        var currentViewHolder: Any? = null
+
+        /**
+         * 调用抖音原生的 openCleanMode 方法, 同步清爽模式状态
+         * @param clean true=开启清爽模式(隐藏控制栏), false=关闭清爽模式(显示控制栏)
+         */
+        @JvmStatic
+        fun callOpenCleanMode(clean: Boolean) {
+            val holder = currentViewHolder ?: return
+            runCatching {
+                holder.findMethodInvoke<Any> {
+                    name("openCleanMode")
+                    paramTypes(Boolean::class.java)
+                }?.invoke(holder, clean)
+            }.onFailure {
+                XplerLog.e("callOpenCleanMode failed: ${it.message}")
+            }
+        }
     }
 
     private val config get() = ConfigV1.get()
@@ -38,7 +60,6 @@ class HVideoViewHolder : BaseHook() {
 
     /**
      * 监听抖音原生 openCleanMode 调用, 同步顶部/底部栏状态
-     * bool=true: 开启清爽模式(隐藏控制栏), bool=false: 关闭清爽模式(显示控制栏)
      */
     @OnAfter("openCleanMode")
     fun openCleanModeAfter(params: MethodParam, bool: Boolean) {
@@ -62,6 +83,7 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onViewHolderSelected")
     fun onViewHolderSelectedAfter(params: MethodParam, index: Int) {
         hookBlockRunning(params) {
+            currentViewHolder = params.thisObject
             currentContainer = getWidgetContainer(params)
         }.onFailure {
             XplerLog.e(it)
@@ -71,6 +93,9 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onViewHolderUnSelected")
     fun onViewHolderUnSelectedAfter(params: MethodParam) {
         hookBlockRunning(params) {
+            if (currentViewHolder === params.thisObject) {
+                currentViewHolder = null
+            }
             val container = getWidgetContainer(params)
             if (currentContainer === container) {
                 currentContainer = null
@@ -83,6 +108,9 @@ class HVideoViewHolder : BaseHook() {
     @OnBefore("onPause")
     fun onPauseBefore(params: MethodParam) {
         hookBlockRunning(params) {
+            if (currentViewHolder === params.thisObject) {
+                currentViewHolder = null
+            }
             val container = getWidgetContainer(params)
             if (currentContainer === container) {
                 currentContainer = null
@@ -95,6 +123,7 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onResume")
     fun onResumeAfter(params: MethodParam) {
         hookBlockRunning(params) {
+            currentViewHolder = params.thisObject
             currentContainer = getWidgetContainer(params)
         }.onFailure {
             XplerLog.e(it)
