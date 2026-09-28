@@ -1,10 +1,5 @@
 package io.github.fplus.core.hook
 
-import androidx.core.view.isVisible
-import com.freegang.extension.findFieldGetValue
-import com.freegang.extension.findMethodInvoke
-import com.ss.android.ugc.aweme.feed.adapter.VideoViewHolder
-import com.ss.android.ugc.aweme.feed.ui.PenetrateTouchRelativeLayout
 import io.github.fplus.core.base.BaseHook
 import io.github.fplus.core.config.ConfigV1
 import io.github.xpler.core.XplerLog
@@ -34,7 +29,7 @@ class HPlayerController : BaseHook() {
         hookBlockRunning(params) {
             playingAid = aid
             isPlaying = true
-            callOpenCleanMode(params, true)
+            HVideoViewHolder.applyNeatMode(true)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -45,7 +40,7 @@ class HPlayerController : BaseHook() {
         hookBlockRunning(params) {
             playingAid = aid
             isPlaying = true
-            callOpenCleanMode(params, true)
+            HVideoViewHolder.applyNeatMode(true)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -56,41 +51,8 @@ class HPlayerController : BaseHook() {
         hookBlockRunning(params) {
             if (playingAid == aid) {
                 isPlaying = false
-                callOpenCleanMode(params, false)
+                HVideoViewHolder.applyNeatMode(false)
             }
-        }.onFailure {
-            XplerLog.e(it)
-        }
-    }
-
-    // @OnBefore("onPlayStop")
-    fun onPlayStopBefore(params: MethodParam, aid: String?) {
-        hookBlockRunning(params) {
-            // XplerLog.d("onPlayStop: $aid")
-            if (playingAid == aid) {
-                isPlaying = false
-                // callOpenCleanMode(params, false)
-            }
-        }.onFailure {
-            XplerLog.e(it)
-        }
-    }
-
-    // @OnBefore("onPlayCompleted")
-    fun onPlayCompletedAfter(params: MethodParam, aid: String?) {
-        hookBlockRunning(params) {
-            // XplerLog.d("onPlayCompleted: $aid")
-            isPlaying = false
-        }.onFailure {
-            XplerLog.e(it)
-        }
-    }
-
-    // @OnAfter("onPlayCompletedFirstTime")
-    fun onPlayCompletedFirstTimeAfter(params: MethodParam, aid: String?) {
-        hookBlockRunning(params) {
-            // XplerLog.d("onPlayCompletedFirstTime: $aid")
-            isPlaying = false
         }.onFailure {
             XplerLog.e(it)
         }
@@ -108,28 +70,5 @@ class HPlayerController : BaseHook() {
         }.onFailure {
             XplerLog.e(it)
         }
-    }
-
-    private fun callOpenCleanMode(params: MethodParam, bool: Boolean) {
-        if (!config.isNeatMode) {
-            return
-        }
-
-        if (!config.neatModeState) {
-            return
-        }
-
-        val videoViewHolder = params.thisObject?.findMethodInvoke<VideoViewHolder> {
-            returnType(VideoViewHolder::class.java, true)
-            predicate { it.parameterTypes.isEmpty() }
-        }
-
-        val view = videoViewHolder?.findFieldGetValue<PenetrateTouchRelativeLayout> {
-            type(PenetrateTouchRelativeLayout::class.java)
-        }
-
-        // toggle
-        view?.isVisible = !bool
-        HMainActivity.toggleView(!bool)
     }
 }

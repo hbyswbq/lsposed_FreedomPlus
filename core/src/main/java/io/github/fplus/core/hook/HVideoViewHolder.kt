@@ -2,7 +2,6 @@ package io.github.fplus.core.hook
 
 import android.annotation.SuppressLint
 import android.view.View
-import android.view.ViewTreeObserver
 import androidx.core.view.isVisible
 import com.freegang.extension.asOrNull
 import com.freegang.extension.findFieldGetValue
@@ -21,42 +20,30 @@ class HVideoViewHolder : BaseHook() {
         @get:Synchronized
         @set:Synchronized
         var aweme: Aweme? = null
+
+        @get:Synchronized
+        @set:Synchronized
+        var currentContainer: PenetrateTouchRelativeLayout? = null
+
+        /**
+         * 根据播放状态应用清爽模式
+         * @param isPlaying true=播放中(隐藏控制栏), false=暂停(显示控制栏)
+         */
+        @JvmStatic
+        fun applyNeatMode(isPlaying: Boolean) {
+            val config = ConfigV1.get()
+            if (!config.isNeatMode || !config.neatModeState) return
+
+            val visible = !isPlaying
+            currentContainer?.isVisible = visible
+            HMainActivity.toggleView(visible)
+        }
     }
 
     private val config get() = ConfigV1.get()
 
-    private var onDrawMaps = mutableMapOf<String, ViewTreeObserver.OnDrawListener?>()
-
     override fun setTargetClass(): Class<*> {
         return DexkitBuilder.videoViewHolderClazz ?: NoneHook::class.java
-    }
-
-    private fun addOnDraw(view: View?) {
-        if (view == null) {
-            XplerLog.d("addOnDraw", "view == null")
-            return
-        }
-
-        val key = Integer.toHexString(System.identityHashCode(view))
-
-        onDrawMaps.putIfAbsent(key, ViewTreeObserver.OnDrawListener {
-            if (config.isNeatMode && config.neatModeState) {
-                view.isVisible = !HPlayerController.isPlaying
-                HMainActivity.toggleView(view.isVisible)
-            }
-        })
-
-        view.viewTreeObserver.addOnDrawListener(onDrawMaps[key])
-    }
-
-    private fun removeOnDraw(view: View?) {
-        if (view == null) {
-            XplerLog.d("removeOnDraw", "view == null")
-            return
-        }
-
-        val key = Integer.toHexString(System.identityHashCode(view))
-        view.viewTreeObserver.removeOnDrawListener(onDrawMaps[key])
     }
 
     private fun getWidgetContainer(params: MethodParam): PenetrateTouchRelativeLayout? {
@@ -107,8 +94,9 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onViewHolderSelected")
     fun onViewHolderSelectedAfter(params: MethodParam, index: Int) {
         hookBlockRunning(params) {
-            val container = getWidgetContainer(params)
-            addOnDraw(container)
+            currentContainer = getWidgetContainer(params)
+            // 选中时立即应用当前播放状态
+            applyNeatMode(HPlayerController.isPlaying)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -118,7 +106,9 @@ class HVideoViewHolder : BaseHook() {
     fun onViewHolderUnSelectedAfter(params: MethodParam) {
         hookBlockRunning(params) {
             val container = getWidgetContainer(params)
-            removeOnDraw(container)
+            if (currentContainer === container) {
+                currentContainer = null
+            }
         }.onFailure {
             XplerLog.e(it)
         }
@@ -128,8 +118,9 @@ class HVideoViewHolder : BaseHook() {
     fun onPauseBefore(params: MethodParam) {
         hookBlockRunning(params) {
             val container = getWidgetContainer(params)
-            removeOnDraw(container)
-            onDrawMaps.clear()
+            if (currentContainer === container) {
+                currentContainer = null
+            }
         }.onFailure {
             XplerLog.e(it)
         }
@@ -138,8 +129,8 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onResume")
     fun onResumeAfter(params: MethodParam) {
         hookBlockRunning(params) {
-            val container = getWidgetContainer(params)
-            addOnDraw(container)
+            currentContainer = getWidgetContainer(params)
+            applyNeatMode(HPlayerController.isPlaying)
         }.onFailure {
             XplerLog.e(it)
         }

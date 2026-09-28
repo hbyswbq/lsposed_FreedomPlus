@@ -135,9 +135,9 @@ class ConfigV1 private constructor() {
         }
 
     /// 弹窗过滤
-    var isDialogFilter: Boolean = false
+    var isDialogFilter: Boolean = true
         get() {
-            field = mmkv.getBoolean("isDialogFilter", false)
+            field = mmkv.getBoolean("isDialogFilter", true)
             return field
         }
         set(value) {
