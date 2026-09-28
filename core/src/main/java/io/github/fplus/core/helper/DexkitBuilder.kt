@@ -47,7 +47,6 @@ object DexkitBuilder {
     var fullFeedFollowFetchPresenterClazz: Class<*>? = null
     var detailPageFragmentClazz: Class<*>? = null
     var emojiPopupWindowClazz: Class<*>? = null
-    var bottomCtrlBarClazz: Class<*>? = null
     var chatListRecyclerViewAdapterClazz: Class<*>? = null
     var chatListRecyclerViewAdapterNewClazz: Class<*>? = null
     var chatListRecalledHintClazz: Class<*>? = null
@@ -369,30 +368,6 @@ object DexkitBuilder {
                 }
                 mainBottomTabViewClazz = mainBottomTabViewFallback.instance("mainBottomTabViewFallback")
             }
-
-            val bottomCtrlBar = bridge.findClass {
-                searchPackages("X")
-                matcher {
-                    superClass = "android.widget.FrameLayout"
-                    fields {
-                        add {
-                            annotations {
-                                add {
-                                    type = "dalvik.annotation.Signature"
-                                    addElement {
-                                        name = "value"
-                                        arrayValue {
-                                            addString("IPauseCtrlAction")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            bottomCtrlBarClazz = bottomCtrlBar.instance("bottomCtrlBar")
 
             val chatListRecyclerViewAdapter = bridge.findClass {
                 // searchPackages("X")
@@ -721,7 +696,6 @@ object DexkitBuilder {
         fullFeedFollowFetchPresenterClazz = classCache.getStringOrDefault("fullFeedFollowFetchPresenter").loadOrFindClass()
         emojiPopupWindowClazz = classCache.getStringOrDefault("emojiPopupWindow").loadOrFindClass()
         detailPageFragmentClazz = classCache.getStringOrDefault("detailPageFragment").loadOrFindClass()
-        bottomCtrlBarClazz = classCache.getStringOrDefault("bottomCtrlBar").loadOrFindClass()
         chatListRecyclerViewAdapterClazz = classCache.getStringOrDefault("chatListRecyclerViewAdapter").loadOrFindClass()
         chatListRecyclerViewAdapterNewClazz = classCache.getStringOrDefault("chatListRecyclerViewAdapterNew").loadOrFindClass()
         chatListRecalledHintClazz = classCache.getStringOrDefault("chatListRecalledHint").loadOrFindClass()

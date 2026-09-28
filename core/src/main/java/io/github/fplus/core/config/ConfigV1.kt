@@ -167,28 +167,6 @@ class ConfigV1 private constructor() {
             field = value
         }
 
-    /// 移除悬浮挑战/评论贴纸
-    var isRemoveSticker: Boolean = false
-        get() {
-            field = mmkv.getBoolean("isRemoveSticker", false)
-            return field
-        }
-        set(value) {
-            mmkv.putBoolean("isRemoveSticker", value)
-            field = value
-        }
-
-    /// 移除底部播放控制栏
-    var isRemoveBottomCtrlBar: Boolean = false
-        get() {
-            field = mmkv.getBoolean("isRemoveBottomCtrlBar", false)
-            return field
-        }
-        set(value) {
-            mmkv.putBoolean("isRemoveBottomCtrlBar", value)
-            field = value
-        }
-
     /// 全屏沉浸式
     var isImmersive: Boolean = false
         get() {

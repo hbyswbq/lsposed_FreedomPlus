@@ -56,7 +56,6 @@ class DouYinMain(private val app: Application) {
                     HDisallowInterceptRelativeLayout()
                     HPlayerController()
                     HPenetrateTouchRelativeLayout()
-                    HInteractStickerParent()
                 },
                 searchAfter = {
                     HCrashTolerance()
@@ -65,7 +64,6 @@ class DouYinMain(private val app: Application) {
                     HLongPressLayout()
                     HVideoViewHolder()
                     HDetailPageFragment()
-                    HBottomCtrlBar()
                 }
             )
 

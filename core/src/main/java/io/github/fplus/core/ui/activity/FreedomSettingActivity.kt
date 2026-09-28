@@ -269,8 +269,6 @@ class FreedomSettingActivity : XplerActivity() {
             modifier = modifier,
         ) {
             item { DownloadItem() }
-            item { RemoveStickerItem() }
-            item { RemoveBottomCtrlBarItem() }
             item { DoubleClickTypeItem() }
             item { NeatModeItem() }
             item { ImmersiveItem() }
@@ -396,30 +394,6 @@ class FreedomSettingActivity : XplerActivity() {
                 }
             }
         }
-    }
-
-    @Composable
-    private fun RemoveStickerItem() {
-        SwitchItem(
-            text = "移除悬浮挑战/评论贴纸",
-            subtext = "部分视频出现的悬浮挑战，视频评论回复等控件",
-            checked = model.isRemoveSticker.observeAsState(false),
-            onCheckedChange = {
-                model.changeIsRemoveSticker(it)
-            }
-        )
-    }
-
-    @Composable
-    private fun RemoveBottomCtrlBarItem() {
-        SwitchItem(
-            text = "移除底部播放控制栏",
-            subtext = "部分版本在暂停视频后底部会出现播放控制栏",
-            checked = model.isRemoveBottomCtrlBar.observeAsState(false),
-            onCheckedChange = {
-                model.changeIsRemoveBottomCtrlBar(it)
-            }
-        )
     }
 
     @Composable

@@ -46,12 +46,6 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
     private var _vibrate = MutableLiveData(false)
     val isVibrate: LiveData<Boolean> = _vibrate
 
-    private var _isRemoveSticker = MutableLiveData(false)
-    val isRemoveSticker: LiveData<Boolean> = _isRemoveSticker
-
-    private var _isRemoveBottomCtrlBar = MutableLiveData(false)
-    val isRemoveBottomCtrlBar: LiveData<Boolean> = _isRemoveBottomCtrlBar
-
     private var _isDoubleClickType = MutableLiveData(false)
     val isDoubleClickType: LiveData<Boolean> = _isDoubleClickType
 
@@ -91,8 +85,6 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
             setCopyLinkDownload(config.copyLinkDownload)
             setVideoCoding(config.videoCoding)
             setVibrate(config.vibrate)
-            changeIsRemoveSticker(config.isRemoveSticker)
-            changeIsRemoveBottomCtrlBar(config.isRemoveBottomCtrlBar)
             changeIsDoubleClickType(config.isDoubleClickType)
             setDoubleClickType(config.doubleClickType)
             changeIsNeatMode(config.isNeatMode)
@@ -136,18 +128,6 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
     fun setVibrate(value: Boolean) {
         _vibrate.value = value
         config.vibrate = value
-    }
-
-    // 移除悬浮挑战/评论贴纸
-    fun changeIsRemoveSticker(value: Boolean) {
-        _isRemoveSticker.value = value
-        config.isRemoveSticker = value
-    }
-
-    // 移除底部播放控制栏
-    fun changeIsRemoveBottomCtrlBar(value: Boolean) {
-        _isRemoveBottomCtrlBar.value = value
-        config.isRemoveBottomCtrlBar = value
     }
 
     // 是否开启更改双击响应类型
