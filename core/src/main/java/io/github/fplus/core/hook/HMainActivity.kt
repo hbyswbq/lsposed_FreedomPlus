@@ -14,6 +14,7 @@ import com.freegang.extension.appVersionCode
 import com.freegang.extension.appVersionName
 import com.freegang.extension.contentView
 import com.freegang.extension.forEachChild
+import com.freegang.extension.parentView
 import com.freegang.extension.is64BitDalvik
 import com.freegang.extension.isDarkMode
 import com.freegang.extension.postRunning
