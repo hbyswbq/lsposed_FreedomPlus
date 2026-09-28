@@ -3,7 +3,6 @@ package io.github.fplus.core.hook
 import android.annotation.SuppressLint
 import com.freegang.extension.asOrNull
 import com.freegang.extension.findFieldGetValue
-import com.freegang.extension.findMethodInvoke
 import com.ss.android.ugc.aweme.feed.model.Aweme
 import com.ss.android.ugc.aweme.feed.ui.PenetrateTouchRelativeLayout
 import io.github.fplus.core.base.BaseHook
@@ -36,10 +35,11 @@ class HVideoViewHolder : BaseHook() {
         fun callOpenCleanMode(clean: Boolean) {
             val holder = currentViewHolder ?: return
             runCatching {
-                holder.findMethodInvoke<Any> {
-                    name("openCleanMode")
-                    paramTypes(Boolean::class.java)
-                }?.invoke(holder, clean)
+                val method = holder.javaClass.methods.firstOrNull {
+                    it.name == "openCleanMode" && it.parameterTypes.size == 1 &&
+                        (it.parameterTypes[0] == Boolean::class.java || it.parameterTypes[0] == Boolean::class.javaPrimitiveType)
+                }
+                method?.invoke(holder, clean)
             }.onFailure {
                 XplerLog.e("callOpenCleanMode failed: ${it.message}")
             }
