@@ -399,7 +399,6 @@ class FreedomSettingActivity : XplerActivity() {
     }
 
     @Composable
-    @Composable
     private fun RemoveStickerItem() {
         SwitchItem(
             text = "移除悬浮挑战/评论贴纸",
@@ -423,7 +422,6 @@ class FreedomSettingActivity : XplerActivity() {
         )
     }
 
-    @Composable
     @Composable
     private fun DoubleClickTypeItem() {
         var showDoubleClickModeDialog by remember { mutableStateOf(false) }
@@ -484,12 +482,6 @@ class FreedomSettingActivity : XplerActivity() {
 
     @Composable
     @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    @Composable
     private fun NeatModeItem() {
         var showLongPressModeDialog by remember { mutableStateOf(false) }
 
@@ -546,7 +538,6 @@ class FreedomSettingActivity : XplerActivity() {
         }
     }
 
-    @Composable
     @Composable
     private fun ImmersiveItem() {
         var showSettingDialog by remember { mutableStateOf(false) }
@@ -606,7 +597,6 @@ class FreedomSettingActivity : XplerActivity() {
 
     @Composable
     @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
-    @Composable
     private fun SwitchItem(
         text: String,
         subtext: String = "",

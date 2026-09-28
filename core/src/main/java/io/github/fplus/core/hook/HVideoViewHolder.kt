@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.core.view.isVisible
+import com.freegang.extension.asOrNull
 import com.freegang.extension.findFieldGetValue
 import com.ss.android.ugc.aweme.feed.model.Aweme
 import com.ss.android.ugc.aweme.feed.ui.PenetrateTouchRelativeLayout
