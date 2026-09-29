@@ -47,7 +47,7 @@ class DouYinMain(private val app: Application) {
             // search and hook
             DexkitBuilder.running(
                 app = app,
-                version = 31,
+                version = 32,
                 searchBefore = {
                     HPhoneWindow()
                     HActivity()

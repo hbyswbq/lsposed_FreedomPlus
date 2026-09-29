@@ -277,11 +277,9 @@ object DexkitBuilder {
                             name = "onSuccess"
                         }
                     }
-                    usingStrings = listOf(
-                        "com.ss.android.ugc.aweme.feed.presenter.RecommendFeedFetchPresenter",
-                        "enter_from",
-                        "homepage_hot",
-                    )
+                    addUsingString("com.ss.android.ugc.aweme.feed.presenter.RecommendFeedFetchPresenter")
+                    addUsingString("enter_from")
+                    addUsingString("homepage_hot")
                 }
             }
             recommendFeedFetchPresenterClazz =
@@ -294,11 +292,9 @@ object DexkitBuilder {
                             name = "onSuccess"
                         }
                     }
-                    usingStrings = listOf(
-                        "com.ss.android.ugc.aweme.feed.presenter.FullFeedFollowFetchPresenter",
-                        "enter_from",
-                        "homepage_follow",
-                    )
+                    addUsingString("com.ss.android.ugc.aweme.feed.presenter.FullFeedFollowFetchPresenter")
+                    addUsingString("enter_from")
+                    addUsingString("homepage_follow")
                 }
             }
             fullFeedFollowFetchPresenterClazz =
