@@ -1,6 +1,5 @@
 package io.github.fplus.core.hook
 
-import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.core.view.isVisible

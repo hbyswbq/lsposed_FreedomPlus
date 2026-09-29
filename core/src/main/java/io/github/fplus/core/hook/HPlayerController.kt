@@ -1,7 +1,6 @@
 package io.github.fplus.core.hook
 
 import io.github.fplus.core.base.BaseHook
-import io.github.fplus.core.config.ConfigV1
 import io.github.xpler.core.XplerLog
 import io.github.xpler.core.entity.EmptyHook
 import io.github.xpler.core.hookBlockRunning
@@ -15,8 +14,6 @@ class HPlayerController : BaseHook() {
         @set:Synchronized
         var isPlaying = true
     }
-
-    private val config get() = ConfigV1.get()
 
     override fun setTargetClass(): Class<*> {
         return runCatching {
