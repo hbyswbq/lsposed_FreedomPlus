@@ -64,6 +64,7 @@ class DouYinMain(private val app: Application) {
                     HMainBottomTabView()
                     HLongPressLayout()
                     HVideoViewHolder()
+                    HFeedPlayerView()
                     HDetailPageFragment()
                 }
             )
