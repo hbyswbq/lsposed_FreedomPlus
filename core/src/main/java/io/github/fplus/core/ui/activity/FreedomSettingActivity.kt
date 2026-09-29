@@ -518,7 +518,11 @@ class FreedomSettingActivity : XplerActivity() {
 
             FMessageDialog(
                 title = "弹窗过滤设置",
+                cancel = "取消",
                 confirm = "保存",
+                onCancel = {
+                    showSettingDialog = false
+                },
                 onConfirm = {
                     model.setDialogFilterKeywords(textState.value)
                     showSettingDialog = false
@@ -577,7 +581,11 @@ class FreedomSettingActivity : XplerActivity() {
 
             FMessageDialog(
                 title = "视频过滤设置",
+                cancel = "取消",
                 confirm = "保存",
+                onCancel = {
+                    showSettingDialog = false
+                },
                 onConfirm = {
                     model.setVideoFilterKeywords(textState.value)
                     showSettingDialog = false

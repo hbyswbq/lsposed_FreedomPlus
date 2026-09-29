@@ -107,6 +107,8 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
             changeIsDialogFilter(config.isDialogFilter)
             setDialogDismissTips(config.dialogDismissTips)
             setDialogFilterKeywords(config.dialogFilterKeywords)
+            changeIsVideoFilter(config.isVideoFilter)
+            setVideoFilterKeywords(config.videoFilterKeywords)
             changeIsImmersive(config.isImmersive)
             setSystemControllerValue(config.systemControllerValue)
         }
