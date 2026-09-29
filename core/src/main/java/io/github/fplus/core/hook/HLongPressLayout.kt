@@ -228,12 +228,18 @@ class HLongPressLayout : BaseHook() {
     }
 
     private fun toggleView(view: View, visible: Boolean) {
-        // 调用抖音原生 openCleanMode 同步清爽模式状态
-        // visible=false(开启清爽模式) -> openCleanMode(true)
-        // visible=true(关闭清爽模式) -> openCleanMode(false)
-        HVideoViewHolder.callOpenCleanMode(!visible)
+        val viewHolderRootView = view as VideoViewHolderRootView
+        val monitorScrollFrameLayout = viewHolderRootView.children.lastOrNull {
+            it.javaClass.name.contains("MonitorScrollFrameLayout")
+        }?.asOrNull<ViewGroup>()
 
-        // 同步顶部/底部栏
+        // 清爽模式
+        monitorScrollFrameLayout?.children?.forEach {
+            if (it is PenetrateTouchRelativeLayout) {
+                it.isVisible = visible
+            }
+        }
+
         HMainActivity.toggleView(visible)
     }
 

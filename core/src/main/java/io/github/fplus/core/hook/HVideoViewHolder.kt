@@ -1,6 +1,9 @@
 package io.github.fplus.core.hook
 
 import android.annotation.SuppressLint
+import android.view.View
+import android.view.ViewTreeObserver
+import androidx.core.view.isVisible
 import com.freegang.extension.asOrNull
 import com.freegang.extension.findFieldGetValue
 import com.ss.android.ugc.aweme.feed.model.Aweme
@@ -18,38 +21,44 @@ class HVideoViewHolder : BaseHook() {
         @get:Synchronized
         @set:Synchronized
         var aweme: Aweme? = null
-
-        @get:Synchronized
-        @set:Synchronized
-        var currentContainer: PenetrateTouchRelativeLayout? = null
-
-        @get:Synchronized
-        @set:Synchronized
-        var currentViewHolder: Any? = null
-
-        /**
-         * 调用抖音原生的 openCleanMode 方法, 同步清爽模式状态
-         * @param clean true=开启清爽模式(隐藏控制栏), false=关闭清爽模式(显示控制栏)
-         */
-        @JvmStatic
-        fun callOpenCleanMode(clean: Boolean) {
-            val holder = currentViewHolder ?: return
-            runCatching {
-                val method = holder.javaClass.methods.firstOrNull {
-                    it.name == "openCleanMode" && it.parameterTypes.size == 1 &&
-                        (it.parameterTypes[0] == Boolean::class.java || it.parameterTypes[0] == Boolean::class.javaPrimitiveType)
-                }
-                method?.invoke(holder, clean)
-            }.onFailure {
-                XplerLog.e("callOpenCleanMode failed: ${it.message}")
-            }
-        }
     }
 
     private val config get() = ConfigV1.get()
 
+    private var onDrawMaps = mutableMapOf<String, ViewTreeObserver.OnDrawListener?>()
+
     override fun setTargetClass(): Class<*> {
         return DexkitBuilder.videoViewHolderClazz ?: NoneHook::class.java
+    }
+
+    private fun addOnDraw(view: View?) {
+        if (view == null) {
+            XplerLog.d("addOnDraw", "view == null")
+            return
+        }
+
+        val key = Integer.toHexString(System.identityHashCode(view))
+
+        onDrawMaps.putIfAbsent(key, ViewTreeObserver.OnDrawListener {
+            if (config.isNeatMode) {
+                if (config.neatModeState) {
+                    view.isVisible = !HPlayerController.isPlaying
+                    HMainActivity.toggleView(view.isVisible)
+                }
+            }
+        })
+
+        view.viewTreeObserver.addOnDrawListener(onDrawMaps[key])
+    }
+
+    private fun removeOnDraw(view: View?) {
+        if (view == null) {
+            XplerLog.d("removeOnDraw", "view == null")
+            return
+        }
+
+        val key = Integer.toHexString(System.identityHashCode(view))
+        view.viewTreeObserver.removeOnDrawListener(onDrawMaps[key])
     }
 
     private fun getWidgetContainer(params: MethodParam): PenetrateTouchRelativeLayout? {
@@ -58,14 +67,31 @@ class HVideoViewHolder : BaseHook() {
         }
     }
 
-    /**
-     * 监听抖音原生 openCleanMode 调用, 同步顶部/底部栏状态
-     */
-    @OnAfter("openCleanMode")
-    fun openCleanModeAfter(params: MethodParam, bool: Boolean) {
+    @OnBefore("isCleanMode")
+    fun isCleanModeBefore(params: MethodParam, view: View?, bool: Boolean) {
         hookBlockRunning(params) {
-            if (!config.isNeatMode || !config.neatModeState) return
-            HMainActivity.toggleView(!bool)
+            if (!config.isNeatMode)
+                return
+
+            if (!config.neatModeState)
+                return
+
+            setResultVoid()
+        }.onFailure {
+            XplerLog.e(it)
+        }
+    }
+
+    @OnBefore("openCleanMode")
+    fun openCleanModeBefore(params: MethodParam, bool: Boolean) {
+        hookBlockRunning(params) {
+            if (!config.isNeatMode)
+                return
+
+            if (!config.neatModeState)
+                return
+
+            setResultVoid()
         }.onFailure {
             XplerLog.e(it)
         }
@@ -83,8 +109,8 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onViewHolderSelected")
     fun onViewHolderSelectedAfter(params: MethodParam, index: Int) {
         hookBlockRunning(params) {
-            currentViewHolder = params.thisObject
-            currentContainer = getWidgetContainer(params)
+            val container = getWidgetContainer(params)
+            addOnDraw(container)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -93,13 +119,8 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onViewHolderUnSelected")
     fun onViewHolderUnSelectedAfter(params: MethodParam) {
         hookBlockRunning(params) {
-            if (currentViewHolder === params.thisObject) {
-                currentViewHolder = null
-            }
             val container = getWidgetContainer(params)
-            if (currentContainer === container) {
-                currentContainer = null
-            }
+            removeOnDraw(container)
         }.onFailure {
             XplerLog.e(it)
         }
@@ -108,13 +129,9 @@ class HVideoViewHolder : BaseHook() {
     @OnBefore("onPause")
     fun onPauseBefore(params: MethodParam) {
         hookBlockRunning(params) {
-            if (currentViewHolder === params.thisObject) {
-                currentViewHolder = null
-            }
             val container = getWidgetContainer(params)
-            if (currentContainer === container) {
-                currentContainer = null
-            }
+            removeOnDraw(container)
+            onDrawMaps.clear()
         }.onFailure {
             XplerLog.e(it)
         }
@@ -123,8 +140,8 @@ class HVideoViewHolder : BaseHook() {
     @OnAfter("onResume")
     fun onResumeAfter(params: MethodParam) {
         hookBlockRunning(params) {
-            currentViewHolder = params.thisObject
-            currentContainer = getWidgetContainer(params)
+            val container = getWidgetContainer(params)
+            addOnDraw(container)
         }.onFailure {
             XplerLog.e(it)
         }

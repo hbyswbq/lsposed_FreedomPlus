@@ -47,9 +47,16 @@ class HPlayerController : BaseHook() {
     @OnBefore("onPausePlay")
     fun onPausePlayBefore(params: MethodParam, aid: String?) {
         hookBlockRunning(params) {
-            if (playingAid == aid) {
-                isPlaying = false
-            }
+            isPlaying = false
+        }.onFailure {
+            XplerLog.e(it)
+        }
+    }
+
+    @OnBefore("onPlayStop")
+    fun onPlayStopBefore(params: MethodParam, aid: String?) {
+        hookBlockRunning(params) {
+            isPlaying = false
         }.onFailure {
             XplerLog.e(it)
         }
