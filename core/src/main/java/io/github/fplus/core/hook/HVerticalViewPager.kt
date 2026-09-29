@@ -2,7 +2,6 @@ package io.github.fplus.core.hook
 
 import com.freegang.extension.findFieldGetValue
 import com.freegang.extension.findFieldSetValue
-import com.freegang.extension.findMethodInvoke
 import com.freegang.ktutils.text.KTextUtils
 import com.ss.android.ugc.aweme.common.widget.VerticalViewPager
 import com.ss.android.ugc.aweme.feed.model.Aweme
@@ -11,10 +10,8 @@ import io.github.fplus.core.base.BaseHook
 import io.github.fplus.core.config.ConfigV1
 import io.github.fplus.core.helper.DexkitBuilder
 import io.github.xpler.core.XplerLog
-import io.github.xpler.core.hookBlockRunning
 import io.github.xpler.core.hookClass
 import io.github.xpler.core.lparam
-import io.github.xpler.core.proxy.MethodParam
 
 class HVerticalViewPager : BaseHook() {
     companion object {
@@ -29,22 +26,21 @@ class HVerticalViewPager : BaseHook() {
 
     private val config get() = ConfigV1.get()
 
-    private val filterKeywordsAndTypes by lazy {
-        config.videoFilterKeywords
+    private val filterKeywordsAndTypes: Set<String>
+        get() = config.videoFilterKeywords
             .replace("，", ",")
             .replace("\\s".toRegex(), "")
             .removePrefix(",").removeSuffix(",")
             .split(",")
+            .filter { it.isNotEmpty() }
             .toSet()
-    }
 
-    private val keywordsRegex by lazy {
-        filterKeywordsAndTypes
+    private val keywordsRegex: Regex
+        get() = filterKeywordsAndTypes
             .filter { !config.videoFilterTypes.contains(it) }
             .joinToString("|")
             .replace("\\|+".toRegex(), "|")
             .toRegex()
-    }
 
     override fun setTargetClass(): Class<*> {
         return VerticalViewPager::class.java
