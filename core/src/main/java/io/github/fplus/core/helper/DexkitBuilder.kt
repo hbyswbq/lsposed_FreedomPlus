@@ -35,6 +35,8 @@ object DexkitBuilder {
     var sideBarNestedScrollViewClazz: Class<*>? = null
     var mainBottomTabViewClazz: Class<*>? = null
     var detailPageFragmentClazz: Class<*>? = null
+    var recommendFeedFetchPresenterClazz: Class<*>? = null
+    var fullFeedFollowFetchPresenterClazz: Class<*>? = null
     var restartUtilsClazz: Class<*>? = null
     var longPressEventClazz: Class<*>? = null
     var doubleClickEventClazz: Class<*>? = null
@@ -268,6 +270,40 @@ object DexkitBuilder {
             }
             tabLandingClazz = tabLanding.instance("tabLanding")
 
+            val recommendFeedFetchPresenter = bridge.findClass {
+                matcher {
+                    methods {
+                        add {
+                            name = "onSuccess"
+                        }
+                    }
+                    usingStrings = listOf(
+                        "com.ss.android.ugc.aweme.feed.presenter.RecommendFeedFetchPresenter",
+                        "enter_from",
+                        "homepage_hot",
+                    )
+                }
+            }
+            recommendFeedFetchPresenterClazz =
+                recommendFeedFetchPresenter.instance("recommendFeedFetchPresenter")
+
+            val fullFeedFollowFetchPresenter = bridge.findClass {
+                matcher {
+                    methods {
+                        add {
+                            name = "onSuccess"
+                        }
+                    }
+                    usingStrings = listOf(
+                        "com.ss.android.ugc.aweme.feed.presenter.FullFeedFollowFetchPresenter",
+                        "enter_from",
+                        "homepage_follow",
+                    )
+                }
+            }
+            fullFeedFollowFetchPresenterClazz =
+                fullFeedFollowFetchPresenter.instance("fullFeedFollowFetchPresenter")
+
 
             //
             // by using string
@@ -332,6 +368,8 @@ object DexkitBuilder {
         mainBottomTabViewClazz = classCache.getStringOrDefault("mainBottomTabView").loadOrFindClass()
             ?: classCache.getStringOrDefault("mainBottomTabViewFallback").loadOrFindClass()
         detailPageFragmentClazz = classCache.getStringOrDefault("detailPageFragment").loadOrFindClass()
+        recommendFeedFetchPresenterClazz = classCache.getStringOrDefault("recommendFeedFetchPresenter").loadOrFindClass()
+        fullFeedFollowFetchPresenterClazz = classCache.getStringOrDefault("fullFeedFollowFetchPresenter").loadOrFindClass()
         restartUtilsClazz = classCache.getStringOrDefault("restartUtils").loadOrFindClass()
         longPressEventClazz = classCache.getStringOrDefault("longPressEvent").loadOrFindClass()
         doubleClickEventClazz = classCache.getStringOrDefault("doubleClickEvent").loadOrFindClass()

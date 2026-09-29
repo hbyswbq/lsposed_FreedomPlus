@@ -64,6 +64,12 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
     private var _dialogFilterKeywords = MutableLiveData("")
     val dialogFilterKeywords: LiveData<String> = _dialogFilterKeywords
 
+    private var _isVideoFilter = MutableLiveData(false)
+    val isVideoFilter: LiveData<Boolean> = _isVideoFilter
+
+    private var _videoFilterKeywords = MutableLiveData("")
+    val videoFilterKeywords: LiveData<String> = _videoFilterKeywords
+
     private var _isImmersive = MutableLiveData(false)
     val isImmersive: LiveData<Boolean> = _isImmersive
 
@@ -176,6 +182,18 @@ class FreedomSettingVM(application: Application) : AndroidViewModel(application)
     fun setDialogFilterKeywords(value: String) {
         _dialogFilterKeywords.value = value
         config.dialogFilterKeywords = value
+    }
+
+    // 视频过滤
+    fun changeIsVideoFilter(value: Boolean) {
+        _isVideoFilter.value = value
+        config.isVideoFilter = value
+    }
+
+    // 视频过滤关键字
+    fun setVideoFilterKeywords(value: String) {
+        _videoFilterKeywords.value = value
+        config.videoFilterKeywords = value
     }
 
     // 全屏沉浸

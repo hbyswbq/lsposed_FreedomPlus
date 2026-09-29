@@ -167,6 +167,31 @@ class ConfigV1 private constructor() {
             field = value
         }
 
+    /// 视频过滤
+    var isVideoFilter: Boolean = true
+        get() {
+            field = mmkv.getBoolean("isVideoFilter", true)
+            return field
+        }
+        set(value) {
+            mmkv.putBoolean("isVideoFilter", value)
+            field = value
+        }
+
+    /// 视频过滤类型
+    val videoFilterTypes = setOf("直播", "广告", "图文", "长视频", "推荐卡片", "推荐商家", "空文案")
+
+    /// 视频过滤关键字
+    var videoFilterKeywords: String = "直播, 广告"
+        get() {
+            field = mmkv.getString("videoFilterKeywords", "直播, 广告")!!
+            return field
+        }
+        set(value) {
+            mmkv.putString("videoFilterKeywords", value)
+            field = value
+        }
+
     /// 清爽模式
     var isNeatMode: Boolean = true
         get() {

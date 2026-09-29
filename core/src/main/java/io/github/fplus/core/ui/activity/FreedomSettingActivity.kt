@@ -253,6 +253,7 @@ class FreedomSettingActivity : XplerActivity() {
             item { DoubleClickTypeItem() }
             item { NeatModeItem() }
             item { DialogFilterItem() }
+            item { VideoFilterItem() }
             item { ImmersiveItem() }
         }
     }
@@ -548,6 +549,58 @@ class FreedomSettingActivity : XplerActivity() {
                         singleLine = false,
                         maxLines = 3,
                         placeholder = { Text("现在安装, 立即升级") },
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun VideoFilterItem() {
+        var showSettingDialog by remember { mutableStateOf(false) }
+
+        SwitchItem(
+            text = "视频过滤",
+            subtext = "自动过滤直播/广告/图文等视频, 点击设置关键字",
+            checked = model.isVideoFilter.observeAsState(false),
+            onClick = {
+                showSettingDialog = true
+            },
+            onCheckedChange = {
+                model.changeIsVideoFilter(it)
+            }
+        )
+
+        if (showSettingDialog) {
+            val keywords by model.videoFilterKeywords.observeAsState("")
+            val textState = remember { mutableStateOf(keywords) }
+
+            FMessageDialog(
+                title = "视频过滤设置",
+                confirm = "保存",
+                onConfirm = {
+                    model.setVideoFilterKeywords(textState.value)
+                    showSettingDialog = false
+                },
+            ) {
+                Column {
+                    Text(
+                        text = "内置过滤类型: 直播, 广告, 图文, 长视频, 推荐卡片, 推荐商家, 空文案",
+                        style = MaterialTheme.typography.body2,
+                    )
+                    Spacer(modifier = Modifier.padding(vertical = 8.dp))
+                    Text(
+                        text = "自定义过滤关键字(逗号分隔, 匹配视频文案)",
+                        style = MaterialTheme.typography.body2,
+                    )
+                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
+                    TextField(
+                        value = textState.value,
+                        onValueChange = { textState.value = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = false,
+                        maxLines = 3,
+                        placeholder = { Text("直播, 广告") },
                     )
                 }
             }
