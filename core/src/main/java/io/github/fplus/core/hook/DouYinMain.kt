@@ -57,7 +57,6 @@ class DouYinMain(private val app: Application) {
                     HPlayerController()
                     HPenetrateTouchRelativeLayout()
                     HDialog()
-                    HVerticalViewPager()
                 },
                 searchAfter = {
                     HCrashTolerance()
@@ -66,6 +65,7 @@ class DouYinMain(private val app: Application) {
                     HLongPressLayout()
                     HVideoViewHolder()
                     HFeedPlayerView()
+                    HVerticalViewPager()
                     HDetailPageFragment()
                 }
             )
