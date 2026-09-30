@@ -46,6 +46,7 @@ class HVerticalViewPager : BaseHook() {
         return VerticalViewPager::class.java
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun filterAwemeList(items: List<Aweme>): List<Aweme> {
         resetFilter()
         val awemes = mutableListOf<Aweme>()
@@ -53,9 +54,11 @@ class HVerticalViewPager : BaseHook() {
             needAweme(item) ?: continue
             awemes.add(item)
         }
+        XplerLog.d("VideoFilter: 推荐 ${items.size} -> ${awemes.size}, live=$isFilterLive ad=$isFilterAd image=$isFilterImage")
         return awemes
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun filterFollowFeedList(items: List<FollowFeed>): List<FollowFeed> {
         resetFilter()
         val followFeeds = mutableListOf<FollowFeed>()
@@ -63,6 +66,7 @@ class HVerticalViewPager : BaseHook() {
             needAweme(item.aweme) ?: continue
             followFeeds.add(item)
         }
+        XplerLog.d("VideoFilter: 关注 ${items.size} -> ${followFeeds.size}")
         return followFeeds
     }
 
@@ -88,21 +92,28 @@ class HVerticalViewPager : BaseHook() {
     }
 
     private fun needAweme(aweme: Aweme): Aweme? {
-        return when {
-            isFilterLive && aweme.isLive -> null
-            isFilterImage && aweme.isMultiImage -> null
-            isFilterAd && aweme.isAd -> null
-            isFilterLongVideo && aweme.isCopyRightLongVideo -> null
-            isFilterRecommendedCards && aweme.awemeType == 145 -> null
-            isFilterRecommendedMerchants && aweme.awemeType == 140 -> null
-            isFilterEmptyDesc && KTextUtils.isEmpty(aweme.desc) -> null
-            keywordsRegex.pattern.trim().isNotEmpty()
-                    && KTextUtils.get(aweme.desc).contains(keywordsRegex) -> null
-            else -> aweme
+        return runCatching {
+            when {
+                isFilterLive && aweme.isLive -> null
+                isFilterImage && aweme.isMultiImage -> null
+                isFilterAd && aweme.isAd -> null
+                isFilterLongVideo && aweme.isCopyRightLongVideo -> null
+                isFilterRecommendedCards && aweme.awemeType == 145 -> null
+                isFilterRecommendedMerchants && aweme.awemeType == 140 -> null
+                isFilterEmptyDesc && KTextUtils.isEmpty(aweme.desc) -> null
+                keywordsRegex.pattern.trim().isNotEmpty()
+                        && KTextUtils.get(aweme.desc).contains(keywordsRegex) -> null
+                else -> aweme
+            }
+        }.getOrElse {
+            XplerLog.e("VideoFilter: needAweme error: ${it.message}")
+            aweme
         }
     }
 
     override fun onInit() {
+        XplerLog.d("VideoFilter: onInit recommend=${DexkitBuilder.recommendFeedFetchPresenterClazz != null} follow=${DexkitBuilder.fullFeedFollowFetchPresenterClazz != null}")
+
         DexkitBuilder.recommendFeedFetchPresenterClazz?.runCatching {
             lparam.hookClass(this)
                 .method("onSuccess") {
@@ -111,16 +122,24 @@ class HVerticalViewPager : BaseHook() {
 
                         val mModel = thisObject?.findFieldGetValue<Any> { name("mModel") }
                         val mData = mModel?.findFieldGetValue<Any> { name("mData") }
-                        if (mData?.javaClass?.name?.contains("FeedItemList") == true) {
-                            val items = mData.findFieldGetValue<List<Aweme>> { name("items") } ?: emptyList()
-                            if (items.size < 3) return@onBefore
+                        XplerLog.d("VideoFilter: 推荐onSuccess mData=${mData?.javaClass?.simpleName}")
 
-                            mData.findFieldSetValue(filterAwemeList(items)) { name("items") }
+                        if (mData != null) {
+                            val items = mData.findFieldGetValue<List<Aweme>> { name("items") }
+                                ?: mData.findFieldGetValue<List<Aweme>> { name("mItems") }
+                                ?: mData.findFieldGetValue<List<Aweme>> { name("list") }
+                                ?: emptyList()
+
+                            if (items.isNotEmpty()) {
+                                mData.findFieldSetValue(filterAwemeList(items)) { name("items") }
+                            } else {
+                                XplerLog.d("VideoFilter: 推荐列表为空, 尝试字段: items/mItems/list")
+                            }
                         }
                     }
                 }
         }?.onFailure {
-            XplerLog.e(it)
+            XplerLog.e("VideoFilter: 推荐Hook失败: ${it.message}")
         }
 
         DexkitBuilder.fullFeedFollowFetchPresenterClazz?.runCatching {
@@ -131,16 +150,22 @@ class HVerticalViewPager : BaseHook() {
 
                         val mModel = thisObject?.findFieldGetValue<Any> { name("mModel") }
                         val mData = mModel?.findFieldGetValue<Any> { name("mData") }
-                        if (mData?.javaClass?.name?.contains("FollowFeedList") == true) {
-                            val mItems = mData.findFieldGetValue<List<FollowFeed>> { name("mItems") } ?: emptyList()
-                            if (mItems.size < 3) return@onBefore
+                        XplerLog.d("VideoFilter: 关注onSuccess mData=${mData?.javaClass?.simpleName}")
 
-                            mData.findFieldSetValue(filterFollowFeedList(mItems)) { name("mItems") }
+                        if (mData != null) {
+                            val mItems = mData.findFieldGetValue<List<FollowFeed>> { name("mItems") }
+                                ?: mData.findFieldGetValue<List<FollowFeed>> { name("items") }
+                                ?: mData.findFieldGetValue<List<FollowFeed>> { name("list") }
+                                ?: emptyList()
+
+                            if (mItems.isNotEmpty()) {
+                                mData.findFieldSetValue(filterFollowFeedList(mItems)) { name("mItems") }
+                            }
                         }
                     }
                 }
         }?.onFailure {
-            XplerLog.e(it)
+            XplerLog.e("VideoFilter: 关注Hook失败: ${it.message}")
         }
     }
 }
